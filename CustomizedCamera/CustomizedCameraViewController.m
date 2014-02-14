@@ -12,10 +12,14 @@
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (strong, nonatomic) UIImagePickerController *imagePickerController;
 @property (strong, nonatomic) IBOutlet UIView *overlayView;
+@property (weak, nonatomic) IBOutlet UIButton *flashModeBTN;
 
 @end
 
 @implementation CustomizedCameraViewController
+
+#define PreferenceFlashMode @"PreferenceFlashMode"
+#define PreferenceDefaultCameraUI @"defaultCameraUI"
 
 #pragma mark - Initialization
 
@@ -48,9 +52,12 @@
         self.imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
         self.imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
         
-        [self setCustomizedCameraUI];
-        
-        self.imagePickerController.showsCameraControls = NO;
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceDefaultCameraUI]) {
+            self.imagePickerController.showsCameraControls = YES;
+        } else {
+            [self setCustomizedCameraUI];
+            self.imagePickerController.showsCameraControls = NO;
+        }
         
         [self presentViewController:self.imagePickerController animated:YES completion:NULL];
     } else {
@@ -101,9 +108,39 @@
 }
 
 - (IBAction)reverseCamera:(id)sender {
+    if (self.imagePickerController.cameraDevice == UIImagePickerControllerCameraDeviceRear) {
+        self.imagePickerController.cameraDevice = UIImagePickerControllerCameraDeviceFront;
+        self.flashModeBTN.hidden = YES;
+    } else {
+        self.imagePickerController.cameraDevice = UIImagePickerControllerCameraDeviceRear;
+        self.flashModeBTN.hidden = NO;
+    }
 }
 
 - (IBAction)lightingControl:(id)sender {
+    NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
+    switch (self.imagePickerController.cameraFlashMode) {
+        case UIImagePickerControllerCameraFlashModeAuto:
+            [self.flashModeBTN setTitle:@"FlashOff" forState:UIControlStateNormal];
+            self.imagePickerController.cameraFlashMode = UIImagePickerControllerCameraFlashModeOff;
+            [userDefault setObject:[NSNumber numberWithInt:UIImagePickerControllerCameraFlashModeOff] forKey:PreferenceFlashMode];
+            break;
+            
+        case UIImagePickerControllerCameraFlashModeOff:
+            [self.flashModeBTN setTitle:@"FlashOn" forState:UIControlStateNormal];
+            self.imagePickerController.cameraFlashMode = UIImagePickerControllerCameraFlashModeOn;
+            [userDefault setObject:[NSNumber numberWithInt:UIImagePickerControllerCameraFlashModeOn] forKey:PreferenceFlashMode];
+            break;
+            
+        case UIImagePickerControllerCameraFlashModeOn:
+            [self.flashModeBTN setTitle:@"FlashAuto" forState:UIControlStateNormal];
+            self.imagePickerController.cameraFlashMode = UIImagePickerControllerCameraFlashModeAuto;
+            [userDefault setObject:[NSNumber numberWithInt:UIImagePickerControllerCameraFlashModeAuto] forKey:PreferenceFlashMode];
+            break;
+            
+        default:
+            break;
+    }
 }
 
 #pragma mark - Functions
@@ -124,6 +161,26 @@
     [[NSBundle mainBundle] loadNibNamed:@"OverlayView" owner:self options:nil];
     //self.overlayView.frame = self.imagePickerController.cameraOverlayView.frame;
     self.imagePickerController.cameraOverlayView = self.overlayView;
+    NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
+    UIImagePickerControllerCameraFlashMode mode = (NSInteger)[userDefault integerForKey:PreferenceFlashMode];
+    switch (mode) {
+        case UIImagePickerControllerCameraFlashModeAuto:
+            [self.flashModeBTN setTitle:@"FlashAuto" forState:UIControlStateNormal];
+            break;
+            
+        case UIImagePickerControllerCameraFlashModeOff:
+            [self.flashModeBTN setTitle:@"FlashOff" forState:UIControlStateNormal];
+            break;
+            
+        case UIImagePickerControllerCameraFlashModeOn:
+            [self.flashModeBTN setTitle:@"FlashOn" forState:UIControlStateNormal];
+            break;
+            
+        default:
+            break;
+    }
+    self.imagePickerController.cameraFlashMode = mode;
+
     self.overlayView = nil;
 }
 

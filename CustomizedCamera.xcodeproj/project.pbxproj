@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E794F5718ADEBE300539DDE /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8E794F5618ADEBE300539DDE /* Settings.bundle */; };
 		8EAF23C518AB8BED00B82971 /* OverlayView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8EAF23C418AB8BED00B82971 /* OverlayView.xib */; };
 		8EC479AD18AA42600008617A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EC479AC18AA42600008617A /* Foundation.framework */; };
 		8EC479AF18AA42600008617A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EC479AE18AA42600008617A /* CoreGraphics.framework */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8E794F5618ADEBE300539DDE /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		8EAF23C418AB8BED00B82971 /* OverlayView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OverlayView.xib; sourceTree = "<group>"; };
 		8EC479A918AA42600008617A /* CustomizedCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CustomizedCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EC479AC18AA42600008617A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -119,6 +121,7 @@
 				8EC479E318AA437F0008617A /* ViewController */,
 				8EC479C418AA42600008617A /* Images.xcassets */,
 				8EC479B318AA42600008617A /* Supporting Files */,
+				8E794F5618ADEBE300539DDE /* Settings.bundle */,
 			);
 			path = CustomizedCamera;
 			sourceTree = "<group>";
@@ -258,6 +261,7 @@
 			files = (
 				8EC479C518AA42600008617A /* Images.xcassets in Resources */,
 				8EAF23C518AB8BED00B82971 /* OverlayView.xib in Resources */,
+				8E794F5718ADEBE300539DDE /* Settings.bundle in Resources */,
 				8EC479B718AA42600008617A /* InfoPlist.strings in Resources */,
 				8EC479C018AA42600008617A /* Main.storyboard in Resources */,
 			);
