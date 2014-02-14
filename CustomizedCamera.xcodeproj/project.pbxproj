@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8EAF23C518AB8BED00B82971 /* OverlayView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8EAF23C418AB8BED00B82971 /* OverlayView.xib */; };
 		8EC479AD18AA42600008617A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EC479AC18AA42600008617A /* Foundation.framework */; };
 		8EC479AF18AA42600008617A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EC479AE18AA42600008617A /* CoreGraphics.framework */; };
 		8EC479B118AA42600008617A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EC479B018AA42600008617A /* UIKit.framework */; };
@@ -34,6 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8EAF23C418AB8BED00B82971 /* OverlayView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OverlayView.xib; sourceTree = "<group>"; };
 		8EC479A918AA42600008617A /* CustomizedCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CustomizedCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EC479AC18AA42600008617A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8EC479AE18AA42600008617A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -112,11 +114,9 @@
 		8EC479B218AA42600008617A /* CustomizedCamera */ = {
 			isa = PBXGroup;
 			children = (
-				8EC479BB18AA42600008617A /* CustomizedCameraAppDelegate.h */,
-				8EC479BC18AA42600008617A /* CustomizedCameraAppDelegate.m */,
-				8EC479BE18AA42600008617A /* Main.storyboard */,
-				8EC479C118AA42600008617A /* CustomizedCameraViewController.h */,
-				8EC479C218AA42600008617A /* CustomizedCameraViewController.m */,
+				8EC479E118AA43740008617A /* Delegate */,
+				8EC479E218AA437A0008617A /* Storyboard */,
+				8EC479E318AA437F0008617A /* ViewController */,
 				8EC479C418AA42600008617A /* Images.xcassets */,
 				8EC479B318AA42600008617A /* Supporting Files */,
 			);
@@ -150,6 +150,33 @@
 				8EC479D418AA42600008617A /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		8EC479E118AA43740008617A /* Delegate */ = {
+			isa = PBXGroup;
+			children = (
+				8EC479BB18AA42600008617A /* CustomizedCameraAppDelegate.h */,
+				8EC479BC18AA42600008617A /* CustomizedCameraAppDelegate.m */,
+			);
+			name = Delegate;
+			sourceTree = "<group>";
+		};
+		8EC479E218AA437A0008617A /* Storyboard */ = {
+			isa = PBXGroup;
+			children = (
+				8EC479BE18AA42600008617A /* Main.storyboard */,
+				8EAF23C418AB8BED00B82971 /* OverlayView.xib */,
+			);
+			name = Storyboard;
+			sourceTree = "<group>";
+		};
+		8EC479E318AA437F0008617A /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				8EC479C118AA42600008617A /* CustomizedCameraViewController.h */,
+				8EC479C218AA42600008617A /* CustomizedCameraViewController.m */,
+			);
+			name = ViewController;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -230,6 +257,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EC479C518AA42600008617A /* Images.xcassets in Resources */,
+				8EAF23C518AB8BED00B82971 /* OverlayView.xib in Resources */,
 				8EC479B718AA42600008617A /* InfoPlist.strings in Resources */,
 				8EC479C018AA42600008617A /* Main.storyboard in Resources */,
 			);
@@ -461,6 +489,7 @@
 				8EC479DD18AA42600008617A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8EC479DE18AA42600008617A /* Build configuration list for PBXNativeTarget "CustomizedCameraTests" */ = {
 			isa = XCConfigurationList;
@@ -469,6 +498,7 @@
 				8EC479E018AA42600008617A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
