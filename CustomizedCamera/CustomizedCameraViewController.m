@@ -88,7 +88,16 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    self.imageView.image = info[UIImagePickerControllerOriginalImage];
+    CGSize screenBounds = [UIScreen mainScreen].bounds.size;
+    CGFloat cameraAspectRatio = 4.0f/3.0f;
+    CGFloat camViewHeight = screenBounds.width * cameraAspectRatio;
+    self.imageView.frame = CGRectMake(0, (screenBounds.height - camViewHeight) / 2.0, screenBounds.width, camViewHeight);
+    if (self.imagePickerController.cameraDevice == UIImagePickerControllerCameraDeviceFront) {
+        UIImage *capturedImage = info[UIImagePickerControllerOriginalImage];
+        self.imageView.image = [UIImage imageWithCGImage:capturedImage.CGImage scale:capturedImage.scale orientation:UIImageOrientationLeftMirrored];
+    } else {
+        self.imageView.image = info[UIImagePickerControllerOriginalImage];
+    }
     [self dismissViewControllerAnimated:YES completion:NULL];
     self.imagePickerController = nil;
     if (self.imagePickerController) {
