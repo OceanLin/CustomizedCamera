@@ -64,7 +64,13 @@
         self.imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
         self.imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
         if (!self.isVersion4) {
-            self.imagePickerController.cameraViewTransform = CGAffineTransformMakeScale(1, 1.3);
+            CGSize screenBounds = [UIScreen mainScreen].bounds.size;
+            CGFloat cameraAspectRatio = 4.0f/3.0f;
+            CGFloat camViewHeight = screenBounds.width * cameraAspectRatio;
+            CGFloat scale = screenBounds.height / camViewHeight;
+            
+            self.imagePickerController.cameraViewTransform = CGAffineTransformMakeTranslation(0, (screenBounds.height - camViewHeight) / 2.0);
+            self.imagePickerController.cameraViewTransform = CGAffineTransformScale(self.imagePickerController.cameraViewTransform, scale, scale);
         }
         if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceDefaultCameraUI]) {
             self.imagePickerController.showsCameraControls = YES;
