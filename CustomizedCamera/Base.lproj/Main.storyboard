@@ -16,13 +16,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VJ0-VZ-xBh">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="VJ0-VZ-xBh">
                                 <rect key="frame" x="20" y="20" width="280" height="440"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FSe-ff-06S">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FSe-ff-06S">
                                 <rect key="frame" x="120" y="200" width="80" height="80"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="80" id="0KT-cd-WH7"/>
+                                    <constraint firstAttribute="height" constant="80" id="zox-In-UUi"/>
+                                </constraints>
                                 <state key="normal" image="camera_btn_n">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -32,6 +36,14 @@
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="centerX" secondItem="FSe-ff-06S" secondAttribute="centerX" id="62M-6W-ZXb"/>
+                            <constraint firstItem="VJ0-VZ-xBh" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" constant="20" symbolic="YES" id="AKy-lh-5sF"/>
+                            <constraint firstAttribute="centerY" secondItem="FSe-ff-06S" secondAttribute="centerY" id="DOm-KO-KYR"/>
+                            <constraint firstItem="VJ0-VZ-xBh" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="20" symbolic="YES" id="cad-VT-wTS"/>
+                            <constraint firstAttribute="trailing" secondItem="VJ0-VZ-xBh" secondAttribute="trailing" constant="20" symbolic="YES" id="fP8-iB-jPw"/>
+                            <constraint firstAttribute="bottom" secondItem="VJ0-VZ-xBh" secondAttribute="bottom" constant="20" symbolic="YES" id="jKB-au-6Od"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="imageView" destination="VJ0-VZ-xBh" id="o1Z-Aa-DsU"/>

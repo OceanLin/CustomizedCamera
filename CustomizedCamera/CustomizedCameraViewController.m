@@ -13,7 +13,7 @@
 @property (strong, nonatomic) UIImagePickerController *imagePickerController;
 @property (strong, nonatomic) IBOutlet UIView *overlayView;
 @property (weak, nonatomic) IBOutlet UIButton *flashModeBTN;
-
+@property (nonatomic) BOOL isVersion4;
 @end
 
 @implementation CustomizedCameraViewController
@@ -27,6 +27,18 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+    CGRect screenBounds = [[UIScreen mainScreen] bounds];
+    if (screenBounds.size.height >= 568.0) {
+        self.isVersion4 = NO;
+    } else {
+        self.isVersion4 = YES;
+    }
+    //    NSLog(@"Height : %f", screenBounds.size.height);
+    //    NSLog(@"Width : %f", screenBounds.size.width);
+   
+//    [[NSBundle mainBundle] loadNibNamed:@"OverlayView" owner:self options:nil];
+//    [self.overlayView setFrame:CGRectMake(0, 0, screenBounds.size.width, screenBounds.size.height)];
+//    [self.view addSubview:self.overlayView];
 }
 
 - (void)didReceiveMemoryWarning
@@ -160,6 +172,7 @@
     
     [[NSBundle mainBundle] loadNibNamed:@"OverlayView" owner:self options:nil];
     //self.overlayView.frame = self.imagePickerController.cameraOverlayView.frame;
+    [self.overlayView setFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height)];
     self.imagePickerController.cameraOverlayView = self.overlayView;
     NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
     UIImagePickerControllerCameraFlashMode mode = (NSInteger)[userDefault integerForKey:PreferenceFlashMode];
