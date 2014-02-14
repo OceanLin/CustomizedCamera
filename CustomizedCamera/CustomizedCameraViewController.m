@@ -63,7 +63,9 @@
         self.imagePickerController.delegate = self;
         self.imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
         self.imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-        
+        if (!self.isVersion4) {
+            self.imagePickerController.cameraViewTransform = CGAffineTransformMakeScale(1, 1.3);
+        }
         if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceDefaultCameraUI]) {
             self.imagePickerController.showsCameraControls = YES;
         } else {
