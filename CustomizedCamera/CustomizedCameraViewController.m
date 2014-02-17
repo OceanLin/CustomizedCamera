@@ -8,6 +8,7 @@
 
 #import "CustomizedCameraViewController.h"
 #import <MobileCoreServices/MobileCoreServices.h> //For kUTTypeImage
+#import "DrawingUIView.h"
 
 @interface CustomizedCameraViewController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UITextViewDelegate>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
@@ -18,6 +19,7 @@
 @property (weak, nonatomic) IBOutlet UITextView *inputTextView;
 @property (strong, nonatomic) UIView *combinationView;
 @property (strong, nonatomic) UIImageView *capturedImageView;
+@property (strong, nonatomic) IBOutlet DrawingUIView *drawingView;
 
 @end
 
@@ -137,6 +139,8 @@
     
     if ([self shouldCombineImage]) {
         [self.combinationView addSubview:self.capturedImageView];
+        UIImageView *drawingImageView = [[UIImageView alloc] initWithImage:self.drawingView.incrementalPathImage];
+        [self.combinationView addSubview:drawingImageView];
         [self.combinationView addSubview:self.inputTextView];
         UIGraphicsBeginImageContext(self.capturedImageView.frame.size);
         [[self.combinationView layer] renderInContext:UIGraphicsGetCurrentContext()];
@@ -151,18 +155,18 @@
     
     [self dismissViewControllerAnimated:YES completion:NULL];
     self.imagePickerController = nil;
-    if (self.imagePickerController) {
-        NSLog(@"picker instance is still there.");
-    }
+//    if (self.imagePickerController) {
+//        NSLog(@"picker instance is still there.");
+//    }
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
     [self dismissViewControllerAnimated:YES completion:NULL];
     self.imagePickerController = nil;
-    if (self.imagePickerController) {
-        NSLog(@"picker instance is still there.");
-    }
+//    if (self.imagePickerController) {
+//        NSLog(@"picker instance is still there.");
+//    }
 }
 
 //- (IBAction)capturePhoto:(id)sender
@@ -173,6 +177,8 @@
 #pragma mark - OverlayView Delegate/Event handler
 
 - (IBAction)drawContent:(id)sender {
+    [self.drawingView controlButtonaHidden:NO];
+    [self overlayViewButtonsHidden:YES];
 }
 
 
@@ -251,6 +257,30 @@
     }
 }
 
+#pragma mark - DrawingView Delegate/Event handler
+
+- (IBAction)finishDraw:(id)sender {
+    [self.drawingView controlButtonaHidden:YES];
+    [self overlayViewButtonsHidden:NO];
+}
+
+- (IBAction)drawingColorSelection:(id)sender {
+    UIButton *selectedBTN = (UIButton *)sender;
+    [selectedBTN.layer setBorderWidth:3.0f];
+    [selectedBTN.layer setBorderColor:[UIColor purpleColor].CGColor];
+    self.drawingView.currentPathColor = selectedBTN.backgroundColor;
+    
+    for (id object in selectedBTN.superview.subviews) {
+        if ([object isKindOfClass:[UIButton class]]) {
+            UIButton *targetBTN = (UIButton *)object;
+            if (targetBTN != sender && ![targetBTN.titleLabel.text isEqualToString:@"DONE"]) {
+                [targetBTN.layer setBorderWidth:0.0f];
+            }
+        }
+    }
+}
+
+
 #pragma mark - Functions
 
 - (void)setCustomizedCameraUI
@@ -270,10 +300,14 @@
     //self.overlayView.frame = self.imagePickerController.cameraOverlayView.frame;
     [self.overlayView setFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height)];
     self.imagePickerController.cameraOverlayView = self.overlayView;
+    
+    //For text input
     self.inputTextView.backgroundColor = [UIColor clearColor];
     self.inputTextView.delegate = self;
     self.inputTextView.userInteractionEnabled = NO;
     [self setInputTextProperty];
+    
+    //For flash mode
     NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
     UIImagePickerControllerCameraFlashMode mode = (NSInteger)[userDefault integerForKey:PreferenceFlashMode];
     switch (mode) {
@@ -293,8 +327,13 @@
             break;
     }
     self.imagePickerController.cameraFlashMode = mode;
+    
+    //For drawing
+    [[NSBundle mainBundle] loadNibNamed:@"DrawingView" owner:self options:nil];
+    [self.overlayView addSubview:self.drawingView];
+    [self.overlayView sendSubviewToBack:self.drawingView];
 
-    self.overlayView = nil;
+    //self.overlayView = nil;
 }
 
 - (void)setPreviewImageViewWithImage:(UIImage *)image
@@ -319,6 +358,15 @@
     self.inputTextView.layer.shadowOffset = CGSizeMake(1.0f, 1.0f);
     self.inputTextView.layer.shadowOpacity = 1.0f;
     self.inputTextView.layer.shadowRadius = 1.0f;
+}
+
+- (void)overlayViewButtonsHidden:(BOOL)hidden
+{
+    for (id object in self.overlayView.subviews) {
+        if ([object isKindOfClass:[UIButton class]]) {
+            ((UIButton *)object).hidden = hidden;
+        }
+    }
 }
 
 @end
