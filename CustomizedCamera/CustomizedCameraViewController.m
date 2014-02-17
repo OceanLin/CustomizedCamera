@@ -7,13 +7,18 @@
 //
 
 #import "CustomizedCameraViewController.h"
+#import <MobileCoreServices/MobileCoreServices.h> //For kUTTypeImage
 
-@interface CustomizedCameraViewController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate>
+@interface CustomizedCameraViewController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UITextViewDelegate>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (strong, nonatomic) UIImagePickerController *imagePickerController;
 @property (strong, nonatomic) IBOutlet UIView *overlayView;
 @property (weak, nonatomic) IBOutlet UIButton *flashModeBTN;
 @property (nonatomic) BOOL isVersion4;
+@property (weak, nonatomic) IBOutlet UITextView *inputTextView;
+@property (strong, nonatomic) UIView *combinationView;
+@property (strong, nonatomic) UIImageView *capturedImageView;
+
 @end
 
 @implementation CustomizedCameraViewController
@@ -35,10 +40,8 @@
     }
     //    NSLog(@"Height : %f", screenBounds.size.height);
     //    NSLog(@"Width : %f", screenBounds.size.width);
-   
-//    [[NSBundle mainBundle] loadNibNamed:@"OverlayView" owner:self options:nil];
-//    [self.overlayView setFrame:CGRectMake(0, 0, screenBounds.size.width, screenBounds.size.height)];
-//    [self.view addSubview:self.overlayView];
+    
+    self.inputTextView.delegate = self;
 }
 
 - (void)didReceiveMemoryWarning
@@ -54,6 +57,24 @@
     }
     
     return _imagePickerController;
+}
+
+- (UIView *)combinationView
+{
+    if (!_combinationView) {
+        _combinationView = [[UIView alloc] initWithFrame:CGRectZero];
+    }
+    
+    return _combinationView;
+}
+
+- (UIImageView *)capturedImageView
+{
+    if (!_capturedImageView) {
+        _capturedImageView = [[UIImageView alloc] init];
+    }
+    
+    return _capturedImageView;
 }
 
 #pragma mark - Delegate/Event handler
@@ -88,16 +109,46 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    CGSize screenBounds = [UIScreen mainScreen].bounds.size;
-    CGFloat cameraAspectRatio = 4.0f/3.0f;
-    CGFloat camViewHeight = screenBounds.width * cameraAspectRatio;
-    self.imageView.frame = CGRectMake(0, (screenBounds.height - camViewHeight) / 2.0, screenBounds.width, camViewHeight);
-    if (self.imagePickerController.cameraDevice == UIImagePickerControllerCameraDeviceFront) {
-        UIImage *capturedImage = info[UIImagePickerControllerOriginalImage];
-        self.imageView.image = [UIImage imageWithCGImage:capturedImage.CGImage scale:capturedImage.scale orientation:UIImageOrientationLeftMirrored];
+    if (self.imagePickerController.sourceType == UIImagePickerControllerSourceTypeCamera) {
+        CGSize screenBounds = [UIScreen mainScreen].bounds.size;
+        CGFloat cameraAspectRatio = 4.0f/3.0f;
+        CGFloat camViewHeight = screenBounds.width * cameraAspectRatio;
+        self.capturedImageView.frame = CGRectMake(0, (screenBounds.height - camViewHeight) / 2.0, screenBounds.width, camViewHeight);
+        //self.imageView.frame = CGRectMake(0, (screenBounds.height - camViewHeight) / 2.0, screenBounds.width, camViewHeight);
+        if (self.imagePickerController.cameraDevice == UIImagePickerControllerCameraDeviceFront) {
+            UIImage *capturedImage = info[UIImagePickerControllerOriginalImage];
+            self.capturedImageView.image = [UIImage imageWithCGImage:capturedImage.CGImage scale:capturedImage.scale orientation:UIImageOrientationLeftMirrored];
+            //self.imageView.image = [UIImage imageWithCGImage:capturedImage.CGImage scale:capturedImage.scale orientation:UIImageOrientationLeftMirrored];
+        } else {
+            self.capturedImageView.image = info[UIImagePickerControllerOriginalImage];
+            //self.imageView.image = info[UIImagePickerControllerOriginalImage];
+        }
     } else {
-        self.imageView.image = info[UIImagePickerControllerOriginalImage];
+        UIImage *pickedImage;
+        pickedImage = info[UIImagePickerControllerEditedImage];
+        if (!pickedImage) {
+            pickedImage = info[UIImagePickerControllerOriginalImage];
+        }
+        
+        //We should based on pickedImage's aspect ratio to adjust the imageView's frame (size, location).
+        self.capturedImageView.image = pickedImage;
+        //self.imageView.image = pickedImage;
     }
+    
+    if ([self shouldCombineImage]) {
+        [self.combinationView addSubview:self.capturedImageView];
+        [self.combinationView addSubview:self.inputTextView];
+        UIGraphicsBeginImageContext(self.capturedImageView.frame.size);
+        [[self.combinationView layer] renderInContext:UIGraphicsGetCurrentContext()];
+        self.imageView.image = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        self.combinationView = nil;
+    } else {
+        [self setPreviewImageViewWithImageView:self.capturedImageView];
+        self.capturedImageView = nil;
+    }
+
+    
     [self dismissViewControllerAnimated:YES completion:NULL];
     self.imagePickerController = nil;
     if (self.imagePickerController) {
@@ -126,10 +177,38 @@
 
 
 - (IBAction)textContent:(id)sender {
+    self.inputTextView.userInteractionEnabled = YES;
+    [self.inputTextView setSelectedRange:NSMakeRange(0, self.inputTextView.text.length)];
+    [self.inputTextView becomeFirstResponder];
 }
 
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+{
+    //When user tap the Done button on keyboard, it will hide the keyboard.
+    if ([text isEqualToString:@"\n"]) {
+        [textView resignFirstResponder];
+        self.inputTextView.userInteractionEnabled = NO;
+    }
+    
+    return YES;
+}
 
 - (IBAction)importPhoto:(id)sender {
+    [self dismissViewControllerAnimated:NO completion:NULL];
+    
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
+        self.imagePickerController.delegate = self;
+        //For the kUTTypeImage, we should import <MobileCoreServices/MobileCoreServices.h>
+        self.imagePickerController.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeImage, nil];
+        //self.imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
+        self.imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        self.imagePickerController.allowsEditing = YES;
+        
+        [self presentViewController:self.imagePickerController animated:YES completion:NULL];
+    } else {
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Import from library" message:@"Photo library is not available." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+    }
 }
 
 - (IBAction)captureWithSend:(id)sender {
@@ -191,6 +270,10 @@
     //self.overlayView.frame = self.imagePickerController.cameraOverlayView.frame;
     [self.overlayView setFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height)];
     self.imagePickerController.cameraOverlayView = self.overlayView;
+    self.inputTextView.backgroundColor = [UIColor clearColor];
+    self.inputTextView.delegate = self;
+    self.inputTextView.userInteractionEnabled = NO;
+    [self setInputTextProperty];
     NSUserDefaults *userDefault = [NSUserDefaults standardUserDefaults];
     UIImagePickerControllerCameraFlashMode mode = (NSInteger)[userDefault integerForKey:PreferenceFlashMode];
     switch (mode) {
@@ -212,6 +295,30 @@
     self.imagePickerController.cameraFlashMode = mode;
 
     self.overlayView = nil;
+}
+
+- (void)setPreviewImageViewWithImage:(UIImage *)image
+{
+    self.imageView.image = image;
+}
+
+- (void)setPreviewImageViewWithImageView:(UIImageView *)imageView
+{
+    self.imageView = imageView;
+}
+
+- (BOOL)shouldCombineImage
+{
+    //We can check if there is addition drawing and text input.
+    return YES;
+}
+
+- (void)setInputTextProperty
+{
+    self.inputTextView.layer.shadowColor = [[UIColor blackColor] CGColor];
+    self.inputTextView.layer.shadowOffset = CGSizeMake(1.0f, 1.0f);
+    self.inputTextView.layer.shadowOpacity = 1.0f;
+    self.inputTextView.layer.shadowRadius = 1.0f;
 }
 
 @end

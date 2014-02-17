@@ -7,6 +7,7 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CustomizedCameraViewController">
             <connections>
                 <outlet property="flashModeBTN" destination="5ZT-Lu-rlm" id="wSX-SI-zCR"/>
+                <outlet property="inputTextView" destination="0KX-Jl-GAi" id="X1H-wF-Aag"/>
                 <outlet property="overlayView" destination="1" id="X8f-PY-mZu"/>
             </connections>
         </placeholder>
@@ -88,6 +89,14 @@
                         <action selector="importPhoto:" destination="-1" eventType="touchUpInside" id="JpH-tM-y5S"/>
                     </connections>
                 </button>
+                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" scrollEnabled="NO" text="Hello, you can type some message here then send with the photo." translatesAutoresizingMaskIntoConstraints="NO" id="0KX-Jl-GAi">
+                    <rect key="frame" x="20" y="128" width="280" height="185"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="done"/>
+                </textView>
             </subviews>
             <constraints>
                 <constraint firstItem="eRr-9c-YeY" firstAttribute="top" secondItem="5ZT-Lu-rlm" secondAttribute="top" id="6bi-Z4-1pJ"/>
