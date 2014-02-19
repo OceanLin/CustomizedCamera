@@ -10,6 +10,9 @@
 		8E4CB99D18B1E0A800665F82 /* DrawingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E4CB99C18B1E0A800665F82 /* DrawingView.xib */; };
 		8E4CB9A018B1E2FA00665F82 /* DrawingUIView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4CB99F18B1E2FA00665F82 /* DrawingUIView.m */; };
 		8E794F5718ADEBE300539DDE /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8E794F5618ADEBE300539DDE /* Settings.bundle */; };
+		8EA2FE0718B44577001BD450 /* AVCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EA2FE0618B44577001BD450 /* AVCameraViewController.m */; };
+		8EA2FE0918B44630001BD450 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EA2FE0818B44630001BD450 /* AVFoundation.framework */; };
+		8EA2FE0B18B46027001BD450 /* AVOverlayView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8EA2FE0A18B46027001BD450 /* AVOverlayView.xib */; };
 		8EAF23C518AB8BED00B82971 /* OverlayView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8EAF23C418AB8BED00B82971 /* OverlayView.xib */; };
 		8EC479AD18AA42600008617A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EC479AC18AA42600008617A /* Foundation.framework */; };
 		8EC479AF18AA42600008617A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EC479AE18AA42600008617A /* CoreGraphics.framework */; };
@@ -42,6 +45,10 @@
 		8E4CB99E18B1E2FA00665F82 /* DrawingUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawingUIView.h; sourceTree = "<group>"; };
 		8E4CB99F18B1E2FA00665F82 /* DrawingUIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawingUIView.m; sourceTree = "<group>"; };
 		8E794F5618ADEBE300539DDE /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		8EA2FE0518B44577001BD450 /* AVCameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCameraViewController.h; sourceTree = "<group>"; };
+		8EA2FE0618B44577001BD450 /* AVCameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVCameraViewController.m; sourceTree = "<group>"; };
+		8EA2FE0818B44630001BD450 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		8EA2FE0A18B46027001BD450 /* AVOverlayView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AVOverlayView.xib; sourceTree = "<group>"; };
 		8EAF23C418AB8BED00B82971 /* OverlayView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OverlayView.xib; sourceTree = "<group>"; };
 		8EC479A918AA42600008617A /* CustomizedCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CustomizedCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EC479AC18AA42600008617A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -69,6 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EA2FE0918B44630001BD450 /* AVFoundation.framework in Frameworks */,
 				8EC479AF18AA42600008617A /* CoreGraphics.framework in Frameworks */,
 				8EC479B118AA42600008617A /* UIKit.framework in Frameworks */,
 				8EC479AD18AA42600008617A /* Foundation.framework in Frameworks */,
@@ -117,6 +125,7 @@
 		8EC479AB18AA42600008617A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8EA2FE0818B44630001BD450 /* AVFoundation.framework */,
 				8EC479AC18AA42600008617A /* Foundation.framework */,
 				8EC479AE18AA42600008617A /* CoreGraphics.framework */,
 				8EC479B018AA42600008617A /* UIKit.framework */,
@@ -183,6 +192,7 @@
 				8EC479BE18AA42600008617A /* Main.storyboard */,
 				8EAF23C418AB8BED00B82971 /* OverlayView.xib */,
 				8E4CB99C18B1E0A800665F82 /* DrawingView.xib */,
+				8EA2FE0A18B46027001BD450 /* AVOverlayView.xib */,
 			);
 			name = Storyboard;
 			sourceTree = "<group>";
@@ -190,6 +200,8 @@
 		8EC479E318AA437F0008617A /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				8EA2FE0518B44577001BD450 /* AVCameraViewController.h */,
+				8EA2FE0618B44577001BD450 /* AVCameraViewController.m */,
 				8E4CB99E18B1E2FA00665F82 /* DrawingUIView.h */,
 				8E4CB99F18B1E2FA00665F82 /* DrawingUIView.m */,
 				8EC479C118AA42600008617A /* CustomizedCameraViewController.h */,
@@ -281,6 +293,7 @@
 				8E4CB99D18B1E0A800665F82 /* DrawingView.xib in Resources */,
 				8EC479B718AA42600008617A /* InfoPlist.strings in Resources */,
 				8EC479C018AA42600008617A /* Main.storyboard in Resources */,
+				8EA2FE0B18B46027001BD450 /* AVOverlayView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +313,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EC479BD18AA42600008617A /* CustomizedCameraAppDelegate.m in Sources */,
+				8EA2FE0718B44577001BD450 /* AVCameraViewController.m in Sources */,
 				8EC479B918AA42600008617A /* main.m in Sources */,
 				8EC479C318AA42600008617A /* CustomizedCameraViewController.m in Sources */,
 				8E4CB9A018B1E2FA00665F82 /* DrawingUIView.m in Sources */,

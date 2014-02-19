@@ -9,6 +9,7 @@
 #import "CustomizedCameraViewController.h"
 #import <MobileCoreServices/MobileCoreServices.h> //For kUTTypeImage
 #import "DrawingUIView.h"
+#import "AVCameraViewController.h"
 
 @interface CustomizedCameraViewController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UITextViewDelegate>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
@@ -21,6 +22,7 @@
 @property (strong, nonatomic) UIImageView *capturedImageView;
 @property (strong, nonatomic) IBOutlet DrawingUIView *drawingView;
 
+@property (strong, nonatomic) AVCameraViewController *avCameraVC;
 @end
 
 @implementation CustomizedCameraViewController
@@ -28,6 +30,7 @@
 #define PreferenceFlashMode @"PreferenceFlashMode"
 #define PreferenceDefaultCameraUI @"defaultCameraUI"
 #define PreferenceSaveToPhotoAlbum @"saveToPhotoAlbum"
+#define PreferenceAVCamera @"enableAVCamera"
 #define CaptureResultImageGap 20.0
 #define CaptureResultImageTotalGap CaptureResultImageGap*2
 
@@ -87,32 +90,37 @@
 #pragma mark - Delegate/Event handler
 
 - (IBAction)enableCamera:(id)sender {
-    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-        self.imagePickerController.delegate = self;
-        self.imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
-        self.imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-        if (!self.isVersion4) {
-            CGSize screenBounds = [UIScreen mainScreen].bounds.size;
-            CGFloat cameraAspectRatio = 4.0f/3.0f;
-            CGFloat camViewHeight = screenBounds.width * cameraAspectRatio;
-            CGFloat scale = screenBounds.height / camViewHeight + 0.5;
-        
-//        NSLog(@"Camera scale : %f", scale);
-//        NSLog(@"camViewH %f", camViewHeight);
-            self.imagePickerController.cameraViewTransform = CGAffineTransformMakeTranslation(0, (screenBounds.height - camViewHeight) / 2.0);
-            self.imagePickerController.cameraViewTransform = CGAffineTransformScale(self.imagePickerController.cameraViewTransform, scale, scale);
-        }
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceDefaultCameraUI]) {
-            self.imagePickerController.showsCameraControls = YES;
-        } else {
-            [self setCustomizedCameraUI];
-            self.imagePickerController.showsCameraControls = NO;
-        }
-        
-        [self presentViewController:self.imagePickerController animated:YES completion:NULL];
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferenceAVCamera] && [[NSUserDefaults standardUserDefaults] boolForKey:PreferenceAVCamera]) {
+        self.avCameraVC = [[AVCameraViewController alloc] init];
+        [self presentViewController:self.avCameraVC animated:YES completion:NULL];
     } else {
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Enable camera" message:@"Camera is not available." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [alertView show];
+        if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+            self.imagePickerController.delegate = self;
+            self.imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
+            self.imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+            if (!self.isVersion4) {
+                CGSize screenBounds = [UIScreen mainScreen].bounds.size;
+                CGFloat cameraAspectRatio = 4.0f/3.0f;
+                CGFloat camViewHeight = screenBounds.width * cameraAspectRatio;
+                CGFloat scale = screenBounds.height / camViewHeight + 0.5;
+            
+    //        NSLog(@"Camera scale : %f", scale);
+    //        NSLog(@"camViewH %f", camViewHeight);
+                self.imagePickerController.cameraViewTransform = CGAffineTransformMakeTranslation(0, (screenBounds.height - camViewHeight) / 2.0);
+                self.imagePickerController.cameraViewTransform = CGAffineTransformScale(self.imagePickerController.cameraViewTransform, scale, scale);
+            }
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceDefaultCameraUI]) {
+                self.imagePickerController.showsCameraControls = YES;
+            } else {
+                [self setCustomizedCameraUI];
+                self.imagePickerController.showsCameraControls = NO;
+            }
+            
+            [self presentViewController:self.imagePickerController animated:YES completion:NULL];
+        } else {
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Enable camera" message:@"Camera is not available." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [alertView show];
+        }
     }
 }
 

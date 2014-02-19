@@ -52,6 +52,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
         </scene>
+        <!--Camera View Controller-->
+        <scene sceneID="Bka-NY-gpS">
+            <objects>
+                <viewController id="I0k-4T-gdK" customClass="AVCameraViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="xxq-hD-XEA"/>
+                        <viewControllerLayoutGuide type="bottom" id="BZx-Km-fNn"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="79a-ZZ-WVX">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="VyG-cI-4gu" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="678" y="-9"/>
+        </scene>
     </scenes>
     <resources>
         <image name="camera_btn_n" width="160" height="161"/>
