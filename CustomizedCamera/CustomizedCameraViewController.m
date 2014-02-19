@@ -27,6 +27,9 @@
 
 #define PreferenceFlashMode @"PreferenceFlashMode"
 #define PreferenceDefaultCameraUI @"defaultCameraUI"
+#define PreferenceSaveToPhotoAlbum @"saveToPhotoAlbum"
+#define CaptureResultImageGap 20.0
+#define CaptureResultImageTotalGap CaptureResultImageGap*2
 
 #pragma mark - Initialization
 
@@ -44,6 +47,8 @@
     //    NSLog(@"Width : %f", screenBounds.size.width);
     
     self.inputTextView.delegate = self;
+    
+    //self.imageView.backgroundColor = [UIColor redColor];
 }
 
 - (void)didReceiveMemoryWarning
@@ -90,8 +95,10 @@
             CGSize screenBounds = [UIScreen mainScreen].bounds.size;
             CGFloat cameraAspectRatio = 4.0f/3.0f;
             CGFloat camViewHeight = screenBounds.width * cameraAspectRatio;
-            CGFloat scale = screenBounds.height / camViewHeight;
-            
+            CGFloat scale = screenBounds.height / camViewHeight + 0.5;
+        
+//        NSLog(@"Camera scale : %f", scale);
+//        NSLog(@"camViewH %f", camViewHeight);
             self.imagePickerController.cameraViewTransform = CGAffineTransformMakeTranslation(0, (screenBounds.height - camViewHeight) / 2.0);
             self.imagePickerController.cameraViewTransform = CGAffineTransformScale(self.imagePickerController.cameraViewTransform, scale, scale);
         }
@@ -112,18 +119,19 @@
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     if (self.imagePickerController.sourceType == UIImagePickerControllerSourceTypeCamera) {
+        UIImage *capturedImage = info[UIImagePickerControllerOriginalImage];
         CGSize screenBounds = [UIScreen mainScreen].bounds.size;
-        CGFloat cameraAspectRatio = 4.0f/3.0f;
-        CGFloat camViewHeight = screenBounds.width * cameraAspectRatio;
-        self.capturedImageView.frame = CGRectMake(0, (screenBounds.height - camViewHeight) / 2.0, screenBounds.width, camViewHeight);
-        //self.imageView.frame = CGRectMake(0, (screenBounds.height - camViewHeight) / 2.0, screenBounds.width, camViewHeight);
+        CGFloat cameraAspectRatio = capturedImage.size.width/capturedImage.size.height;
+        CGFloat camViewWidth = screenBounds.height * cameraAspectRatio;
+        capturedImage = [self resizeImage:info[UIImagePickerControllerOriginalImage] scaleToSize:CGSizeMake(camViewWidth, screenBounds.height)];
+        CGFloat offectX = (capturedImage.size.width - screenBounds.width) / 2;
+        capturedImage = [self cropImage:capturedImage withRect:CGRectMake(offectX, 0, camViewWidth, screenBounds.height)];
+        self.capturedImageView = [[UIImageView alloc] initWithImage:capturedImage];
+
         if (self.imagePickerController.cameraDevice == UIImagePickerControllerCameraDeviceFront) {
-            UIImage *capturedImage = info[UIImagePickerControllerOriginalImage];
             self.capturedImageView.image = [UIImage imageWithCGImage:capturedImage.CGImage scale:capturedImage.scale orientation:UIImageOrientationLeftMirrored];
-            //self.imageView.image = [UIImage imageWithCGImage:capturedImage.CGImage scale:capturedImage.scale orientation:UIImageOrientationLeftMirrored];
         } else {
-            self.capturedImageView.image = info[UIImagePickerControllerOriginalImage];
-            //self.imageView.image = info[UIImagePickerControllerOriginalImage];
+            self.capturedImageView.image = capturedImage;
         }
     } else {
         UIImage *pickedImage;
@@ -134,24 +142,43 @@
         
         //We should based on pickedImage's aspect ratio to adjust the imageView's frame (size, location).
         self.capturedImageView.image = pickedImage;
-        //self.imageView.image = pickedImage;
     }
     
     if ([self shouldCombineImage]) {
+        //Combine the text and line and captured image as an image
         [self.combinationView addSubview:self.capturedImageView];
         UIImageView *drawingImageView = [[UIImageView alloc] initWithImage:self.drawingView.incrementalPathImage];
         [self.combinationView addSubview:drawingImageView];
         [self.combinationView addSubview:self.inputTextView];
         UIGraphicsBeginImageContext(self.capturedImageView.frame.size);
         [[self.combinationView layer] renderInContext:UIGraphicsGetCurrentContext()];
-        self.imageView.image = UIGraphicsGetImageFromCurrentImageContext();
+        UIImage *combinedImage = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
+        
+        //Adjust the result imageView to correct size and position
+        //However, the size is controlled by the image but not the imageView.
+        //If we want to resize it, we need to resize the image.
+        CGSize screenBounds = [UIScreen mainScreen].bounds.size;
+        CGFloat maxH = screenBounds.height - CaptureResultImageTotalGap;
+        CGFloat maxW = screenBounds.width - CaptureResultImageTotalGap;
+        CGFloat hRatio = maxH / self.imageView.frame.size.height;
+        CGFloat wRatio = maxW / self.imageView.frame.size.width;
+        CGFloat scaleRatio = hRatio < wRatio ? hRatio : wRatio;
+        
+        self.imageView.transform = CGAffineTransformMakeScale(scaleRatio, scaleRatio);
+        self.imageView.transform = CGAffineTransformMakeTranslation(((screenBounds.width-self.imageView.frame.size.width)/2)-self.imageView.frame.origin.x, ((screenBounds.height-self.imageView.frame.size.height)/2)-self.imageView.frame.origin.y);
+        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        self.imageView.image = combinedImage;
+
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceSaveToPhotoAlbum]) {
+            UIImageWriteToSavedPhotosAlbum(combinedImage, nil, nil, nil);
+        }
+        
         self.combinationView = nil;
     } else {
         [self setPreviewImageViewWithImageView:self.capturedImageView];
         self.capturedImageView = nil;
     }
-
     
     [self dismissViewControllerAnimated:YES completion:NULL];
     self.imagePickerController = nil;
@@ -168,11 +195,6 @@
 //        NSLog(@"picker instance is still there.");
 //    }
 }
-
-//- (IBAction)capturePhoto:(id)sender
-//{
-//    [self.imagePickerController takePicture];
-//}
 
 #pragma mark - OverlayView Delegate/Event handler
 
@@ -330,6 +352,7 @@
     
     //For drawing
     [[NSBundle mainBundle] loadNibNamed:@"DrawingView" owner:self options:nil];
+    [self.overlayView setFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height)];
     [self.overlayView addSubview:self.drawingView];
     [self.overlayView sendSubviewToBack:self.drawingView];
 
@@ -367,6 +390,26 @@
             ((UIButton *)object).hidden = hidden;
         }
     }
+}
+
+- (UIImage *)resizeImage:(UIImage *)image scaleToSize:(CGSize)newSize
+{
+    UIGraphicsBeginImageContext(newSize);
+    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return newImage;
+}
+
+- (UIImage *)cropImage:(UIImage *)image withRect:(CGRect)cropRect
+{
+    cropRect = CGRectMake(cropRect.origin.x*image.scale, cropRect.origin.y*image.scale, cropRect.size.width*image.scale, cropRect.size.height*image.scale);
+    CGImageRef imageRef = CGImageCreateWithImageInRect([image CGImage], cropRect);
+    UIImage *croppedImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    
+    return croppedImage;
 }
 
 @end
