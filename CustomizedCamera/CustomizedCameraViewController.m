@@ -133,13 +133,13 @@
         CGFloat camViewWidth = screenBounds.height * cameraAspectRatio;
         capturedImage = [self resizeImage:info[UIImagePickerControllerOriginalImage] scaleToSize:CGSizeMake(camViewWidth, screenBounds.height)];
         CGFloat offectX = (capturedImage.size.width - screenBounds.width) / 2;
-        capturedImage = [self cropImage:capturedImage withRect:CGRectMake(offectX, 0, camViewWidth, screenBounds.height)];
-        self.capturedImageView = [[UIImageView alloc] initWithImage:capturedImage];
+        capturedImage = [self cropImage:capturedImage withRect:CGRectMake(offectX, 0, screenBounds.width, screenBounds.height)];
 
         if (self.imagePickerController.cameraDevice == UIImagePickerControllerCameraDeviceFront) {
-            self.capturedImageView.image = [UIImage imageWithCGImage:capturedImage.CGImage scale:capturedImage.scale orientation:UIImageOrientationLeftMirrored];
+            UIImage *reverseImage = [UIImage imageWithCGImage:capturedImage.CGImage scale:capturedImage.scale orientation:UIImageOrientationUpMirrored];
+            self.capturedImageView = [[UIImageView alloc] initWithImage:reverseImage];
         } else {
-            self.capturedImageView.image = capturedImage;
+            self.capturedImageView = [[UIImageView alloc] initWithImage:capturedImage];
         }
     } else {
         UIImage *pickedImage;
