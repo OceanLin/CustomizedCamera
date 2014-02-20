@@ -10,6 +10,7 @@
 #import <MobileCoreServices/MobileCoreServices.h> //For kUTTypeImage
 #import "DrawingUIView.h"
 #import "AVCameraViewController.h"
+#import "InternalNotificationHelper.h"
 
 @interface CustomizedCameraViewController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UITextViewDelegate>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
@@ -93,6 +94,10 @@
     if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferenceAVCamera] && [[NSUserDefaults standardUserDefaults] boolForKey:PreferenceAVCamera]) {
         self.avCameraVC = [[AVCameraViewController alloc] init];
         [self presentViewController:self.avCameraVC animated:YES completion:NULL];
+        [[NSNotificationCenter defaultCenter] addObserverForName:ImageReadyFromAVCapture object:nil queue:nil usingBlock:^(NSNotification *note) {
+            UIImage *capturedImage = [UIImage imageWithData:note.userInfo[CapturedImageData]];
+            self.imageView.image = capturedImage;
+        }];
     } else {
         if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
             self.imagePickerController.delegate = self;

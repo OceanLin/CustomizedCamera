@@ -45,6 +45,7 @@
 		8E4CB99E18B1E2FA00665F82 /* DrawingUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawingUIView.h; sourceTree = "<group>"; };
 		8E4CB99F18B1E2FA00665F82 /* DrawingUIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawingUIView.m; sourceTree = "<group>"; };
 		8E794F5618ADEBE300539DDE /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		8E82A13218B49E310063237A /* InternalNotificationHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InternalNotificationHelper.h; path = ../InternalNotificationHelper.h; sourceTree = "<group>"; };
 		8EA2FE0518B44577001BD450 /* AVCameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCameraViewController.h; sourceTree = "<group>"; };
 		8EA2FE0618B44577001BD450 /* AVCameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVCameraViewController.m; sourceTree = "<group>"; };
 		8EA2FE0818B44630001BD450 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -103,6 +104,14 @@
 			name = iPad;
 			sourceTree = "<group>";
 		};
+		8E82A13318B49E420063237A /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				8E82A13218B49E310063237A /* InternalNotificationHelper.h */,
+			);
+			name = Helper;
+			sourceTree = "<group>";
+		};
 		8EC479A018AA42600008617A = {
 			isa = PBXGroup;
 			children = (
@@ -144,6 +153,7 @@
 				8EC479C418AA42600008617A /* Images.xcassets */,
 				8EC479B318AA42600008617A /* Supporting Files */,
 				8E794F5618ADEBE300539DDE /* Settings.bundle */,
+				8E82A13318B49E420063237A /* Helper */,
 			);
 			path = CustomizedCamera;
 			sourceTree = "<group>";
