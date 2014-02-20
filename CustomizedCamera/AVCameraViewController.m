@@ -23,6 +23,8 @@
 
 #define PreferenceCameraDevice @"PreferenceCameraDevice"
 #define PreferenceFlashMode @"PreferenceFlashMode"
+#define PreferencecontinuallyFocus @"PreferencecontinuallyAutoFocus"
+#define PreferenceFocusPOI @"PreferenceFocusPOI"
 
 #pragma mark - Initialization
 
@@ -93,6 +95,7 @@
                             NSLog(@"Got error when set the device input.");
                             return nil;
                         } else {
+                            [self setupFocusWithDevice:[deviceInput device]];
                             [_captureSession addInput:deviceInput];
                             break;
                         }
@@ -105,6 +108,7 @@
                             NSLog(@"Got error when set the device input.");
                             return nil;
                         } else {
+                            [self setupFocusWithDevice:[deviceInput device]];
                             [_captureSession addInput:deviceInput];
                             break;
                         }
@@ -154,7 +158,8 @@
                 NSLog(@"No image data from the image output.");
             } else {
                 NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-                [[NSNotificationCenter defaultCenter] postNotificationName:ImageReadyFromAVCapture object:nil userInfo:@{CapturedImageData:imageData}];
+                UIImage *capturedImage = [UIImage imageWithData:imageData];
+                [[NSNotificationCenter defaultCenter] postNotificationName:ImageReadyFromAVCapture object:nil userInfo:@{CapturedImageData:capturedImage}];
                 
                 //If we need the meta data, we can retrieve that by following call.
                 //CFDictionaryRef myAttachments = CMGetAttachment(imageDataSampleBuffer, kCGImagePropertyExifDictionary, NULL);
@@ -178,11 +183,13 @@
                         NSLog(@"Got error when reverse the camera.");
                         break;
                     } else {
-                        self.flashModeBTN.hidden = YES;
+                        [self setupFocusWithDevice:[deviceInput device]];
+                        
                         [self.captureSession beginConfiguration];
                         [self.captureSession removeInput:oldInput];
                         [self.captureSession addInput:deviceInput];
                         [self.captureSession commitConfiguration];
+                        self.flashModeBTN.hidden = YES;
                         [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:AVCaptureDevicePositionFront] forKey:PreferenceCameraDevice];
                         break;
                     }
@@ -198,6 +205,8 @@
                         NSLog(@"Got error when reverse the camera.");
                         break;
                     } else {
+                        [self setupFocusWithDevice:[deviceInput device]];
+                        
                         [self.captureSession beginConfiguration];
                         [self.captureSession removeInput:oldInput];
                         [self.captureSession addInput:deviceInput];
@@ -280,14 +289,34 @@
     for (AVCaptureDeviceInput *input in self.captureSession.inputs) {
         if ([input device].position == AVCaptureDevicePositionBack) {
             AVCaptureDevice *captureDevice = [input device];
-            
-            if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferenceFlashMode]) {
-                AVCaptureFlashMode flashMode = [[NSUserDefaults standardUserDefaults] integerForKey:PreferenceFlashMode];
-                NSError *error;
-                if ([captureDevice lockForConfiguration:&error]) {
-                    [captureDevice setFlashMode:flashMode];
-                    [captureDevice unlockForConfiguration];
-                    switch (flashMode) {
+            if (captureDevice.isFlashAvailable) {
+                if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferenceFlashMode]) {
+                    AVCaptureFlashMode flashMode = [[NSUserDefaults standardUserDefaults] integerForKey:PreferenceFlashMode];
+                    NSError *error;
+                    if ([captureDevice lockForConfiguration:&error]) {
+                        [captureDevice setFlashMode:flashMode];
+                        [captureDevice unlockForConfiguration];
+                        switch (flashMode) {
+                            case AVCaptureFlashModeOff:
+                                [self.flashModeBTN setTitle:@"FlashOff" forState:UIControlStateNormal];
+                                break;
+                                
+                            case AVCaptureFlashModeOn:
+                                [self.flashModeBTN setTitle:@"FlashOn" forState:UIControlStateNormal];
+                                break;
+                                
+                            case AVCaptureFlashModeAuto:
+                                [self.flashModeBTN setTitle:@"FlashAuto" forState:UIControlStateNormal];
+                                break;
+                                
+                            default:
+                                break;
+                        }
+                    } else {
+                        NSLog(@"Change flash mode fail : error : %@", error.localizedDescription);
+                    }
+                } else {
+                    switch (captureDevice.flashMode) {
                         case AVCaptureFlashModeOff:
                             [self.flashModeBTN setTitle:@"FlashOff" forState:UIControlStateNormal];
                             break;
@@ -303,31 +332,53 @@
                         default:
                             break;
                     }
-                } else {
-                    NSLog(@"Change flash mode fail : error : %@", error.localizedDescription);
                 }
             } else {
-                switch (captureDevice.flashMode) {
-                    case AVCaptureFlashModeOff:
-                        [self.flashModeBTN setTitle:@"FlashOff" forState:UIControlStateNormal];
-                        break;
-                        
-                    case AVCaptureFlashModeOn:
-                        [self.flashModeBTN setTitle:@"FlashOn" forState:UIControlStateNormal];
-                        break;
-                        
-                    case AVCaptureFlashModeAuto:
-                        [self.flashModeBTN setTitle:@"FlashAuto" forState:UIControlStateNormal];
-                        break;
-                        
-                    default:
-                        break;
-                }
+                self.flashModeBTN.hidden = YES;
             }
             break;
         } else {
             self.flashModeBTN.hidden = YES;
         }
+    }
+}
+
+- (void)setupFocusWithDevice:(AVCaptureDevice *)captureDevice
+{
+    NSError *error;
+    if ([captureDevice lockForConfiguration:&error]) {
+        if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferencecontinuallyFocus]) {
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferencecontinuallyFocus]) {
+                if ([captureDevice isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus]) {
+                    [captureDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+                } else {
+                    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Focus Setting" message:@"Can not set AVCaptureFocusModeContinuousAutoFocus" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                    [alertView show];
+                }
+            } else {
+                if ([captureDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
+                    [captureDevice setFocusMode:AVCaptureFocusModeAutoFocus];
+                } else {
+                    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Focus Setting" message:@"Can not set AVCaptureFocusModeAutoFocus" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                    [alertView show];
+                }
+            }
+        }
+        
+        if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferenceFocusPOI]) {
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceFocusPOI]) {
+                if ([captureDevice isFocusPointOfInterestSupported]) {
+                    [captureDevice setFocusPointOfInterest:CGPointMake(0.5f, 0.5f)];
+                } else {
+                    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Focus Setting" message:@"Can not set Focus POI" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                    [alertView show];
+                }
+            }
+        }
+        
+        [captureDevice unlockForConfiguration];
+    } else {
+        NSLog(@"Set up focus fail. Error : %@", error.localizedDescription);
     }
 }
 

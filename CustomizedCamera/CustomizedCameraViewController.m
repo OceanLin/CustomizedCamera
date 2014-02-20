@@ -95,8 +95,31 @@
         self.avCameraVC = [[AVCameraViewController alloc] init];
         [self presentViewController:self.avCameraVC animated:YES completion:NULL];
         [[NSNotificationCenter defaultCenter] addObserverForName:ImageReadyFromAVCapture object:nil queue:nil usingBlock:^(NSNotification *note) {
-            UIImage *capturedImage = [UIImage imageWithData:note.userInfo[CapturedImageData]];
-            self.imageView.image = capturedImage;
+            if ([note.userInfo[CapturedImageData] isKindOfClass:[NSData class]]) {
+                UIImage *capturedImage = [UIImage imageWithData:note.userInfo[CapturedImageData]];
+                self.imageView.image = capturedImage;
+            } else {
+                //Already convert to UIImage
+                UIImage *capturedImage = note.userInfo[CapturedImageData];
+                CGSize screenBounds = [UIScreen mainScreen].bounds.size;
+                CGFloat cameraAspectRatio = capturedImage.size.width/capturedImage.size.height;
+                CGFloat camViewWidth = screenBounds.height * cameraAspectRatio;
+                capturedImage = [self resizeImage:capturedImage scaleToSize:CGSizeMake(camViewWidth, screenBounds.height)];
+                CGFloat offectX = (capturedImage.size.width - screenBounds.width) / 2;
+                capturedImage = [self cropImage:capturedImage withRect:CGRectMake(offectX, 0, screenBounds.width, screenBounds.height)];
+                
+                CGFloat maxH = screenBounds.height - CaptureResultImageTotalGap;
+                CGFloat maxW = screenBounds.width - CaptureResultImageTotalGap;
+                CGFloat hRatio = maxH / self.imageView.frame.size.height;
+                CGFloat wRatio = maxW / self.imageView.frame.size.width;
+                CGFloat scaleRatio = hRatio < wRatio ? hRatio : wRatio;
+                self.imageView.transform = CGAffineTransformMakeScale(scaleRatio, scaleRatio);
+                self.imageView.transform = CGAffineTransformMakeTranslation(((screenBounds.width-self.imageView.frame.size.width)/2)-self.imageView.frame.origin.x, ((screenBounds.height-self.imageView.frame.size.height)/2)-self.imageView.frame.origin.y);
+                self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+                
+                self.imageView.image = capturedImage;
+            }
+
         }];
     } else {
         if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
