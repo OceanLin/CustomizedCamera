@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E1D460E18B8412B002A17F1 /* AVOverlayUIView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E1D460D18B8412B002A17F1 /* AVOverlayUIView.m */; };
 		8E4CB99D18B1E0A800665F82 /* DrawingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E4CB99C18B1E0A800665F82 /* DrawingView.xib */; };
 		8E4CB9A018B1E2FA00665F82 /* DrawingUIView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4CB99F18B1E2FA00665F82 /* DrawingUIView.m */; };
 		8E794F5718ADEBE300539DDE /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8E794F5618ADEBE300539DDE /* Settings.bundle */; };
@@ -41,6 +42,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8E1D460C18B8412B002A17F1 /* AVOverlayUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVOverlayUIView.h; sourceTree = "<group>"; };
+		8E1D460D18B8412B002A17F1 /* AVOverlayUIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVOverlayUIView.m; sourceTree = "<group>"; };
 		8E4CB99C18B1E0A800665F82 /* DrawingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DrawingView.xib; sourceTree = "<group>"; };
 		8E4CB99E18B1E2FA00665F82 /* DrawingUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawingUIView.h; sourceTree = "<group>"; };
 		8E4CB99F18B1E2FA00665F82 /* DrawingUIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawingUIView.m; sourceTree = "<group>"; };
@@ -212,6 +215,8 @@
 			children = (
 				8EA2FE0518B44577001BD450 /* AVCameraViewController.h */,
 				8EA2FE0618B44577001BD450 /* AVCameraViewController.m */,
+				8E1D460C18B8412B002A17F1 /* AVOverlayUIView.h */,
+				8E1D460D18B8412B002A17F1 /* AVOverlayUIView.m */,
 				8E4CB99E18B1E2FA00665F82 /* DrawingUIView.h */,
 				8E4CB99F18B1E2FA00665F82 /* DrawingUIView.m */,
 				8EC479C118AA42600008617A /* CustomizedCameraViewController.h */,
@@ -322,6 +327,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E1D460E18B8412B002A17F1 /* AVOverlayUIView.m in Sources */,
 				8EC479BD18AA42600008617A /* CustomizedCameraAppDelegate.m in Sources */,
 				8EA2FE0718B44577001BD450 /* AVCameraViewController.m in Sources */,
 				8EC479B918AA42600008617A /* main.m in Sources */,

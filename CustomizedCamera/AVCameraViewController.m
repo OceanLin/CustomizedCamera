@@ -9,12 +9,13 @@
 #import "AVCameraViewController.h"
 #import <AVFoundation/AVFoundation.h>
 #import "InternalNotificationHelper.h"
+#import "AVOverlayUIView.h"
 
 @interface AVCameraViewController ()
 @property (strong, nonatomic) AVCaptureSession *captureSession;
 @property (strong, nonatomic) AVCaptureStillImageOutput *imageOutput;
 @property (strong, nonatomic) UIView *cameraPreviewUIView;
-@property (strong, nonatomic) IBOutlet UIView *avOverlayView;
+@property (strong, nonatomic) IBOutlet AVOverlayUIView *avOverlayView;
 @property (weak, nonatomic) IBOutlet UIButton *flashModeBTN;
 @property (weak, nonatomic) IBOutlet UIButton *reverseBTN;
 @end
@@ -69,6 +70,66 @@
         [self.imageOutput setOutputSettings:outputSettings];
         [self.captureSession addOutput:self.imageOutput];
     }
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:AVCameraTouchToFocus object:nil queue:nil usingBlock:^(NSNotification *note) {
+        NSDictionary *poiDic = (NSDictionary *)note.userInfo[FocusPOI];
+        CGPoint poi = CGPointMake([((NSString *)poiDic[@"x"]) floatValue], [((NSString *)poiDic[@"y"]) floatValue]);
+        //The origin for setFocusPointOfInterest and setExposurePointOfInterest is that
+        //the CGPoint where {0,0} corresponds to the top left of the picture area,
+        //and {1,1} corresponds to the bottom right in landscape mode with the
+        //home button on the right—this applies even if the device is in portrait mode.
+        //So, we need to convert the poi for the special origin.
+        CGPoint convertedPOI = [self convertLTtoRTWithPoint:poi];
+        CGPoint convertedPOIInPercentage = CGPointMake(convertedPOI.x/[UIScreen mainScreen].bounds.size.height, convertedPOI.y/[UIScreen mainScreen].bounds.size.width);
+        
+        for (AVCaptureDeviceInput *input in self.captureSession.inputs) {
+            AVCaptureDevice *captureDevice = [input device];
+            //NSLog(@"%@", captureDevice.localizedName);
+            NSError *error;
+            if ([captureDevice lockForConfiguration:&error]) {
+                if ([captureDevice isFocusPointOfInterestSupported]) {
+                    [captureDevice setFocusPointOfInterest:convertedPOIInPercentage];
+                    if ([captureDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
+                        [captureDevice setFocusMode:AVCaptureFocusModeAutoFocus];
+                    } else {
+                        NSLog(@"Can not support AutoFocus.");
+                    }
+                } else {
+                    NSLog(@"Can not support POI focus.");
+                }
+                
+                if ([captureDevice isExposurePointOfInterestSupported]) {
+                    [captureDevice setExposurePointOfInterest:convertedPOIInPercentage];
+                    if ([captureDevice isExposureModeSupported:AVCaptureExposureModeAutoExpose]) {
+                        [captureDevice setExposureMode:AVCaptureExposureModeAutoExpose];
+                    } else {
+                        NSLog(@"Can not support AutoExpose.");
+                        if ([captureDevice isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure]) {
+                            [captureDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+                        } else {
+                            NSLog(@"Can not support ContinuousAutoExposure also.");
+                        }
+                    }
+                } else {
+                    NSLog(@"Can not support POI exposure.");
+                }
+                
+                if ([captureDevice isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeAutoWhiteBalance]) {
+                    [captureDevice setWhiteBalanceMode:AVCaptureWhiteBalanceModeAutoWhiteBalance];
+                } else {
+                    NSLog(@"Can not support AutoWhiteBalance");
+                    if ([captureDevice isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance]) {
+                        [captureDevice setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
+                    } else {
+                        NSLog(@"Can not support ContinuousAutoWhiteBalance also");
+                    }
+                }
+                [captureDevice unlockForConfiguration];
+            } else {
+                NSLog(@"Touch to set focus fail.");
+            }
+        }
+    }];
 }
 
 - (AVCaptureSession *)captureSession
@@ -130,6 +191,7 @@
     if (self.captureSession) {
         [self.captureSession stopRunning];
     }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - Overlay Delegate/Event handler
@@ -380,6 +442,13 @@
     } else {
         NSLog(@"Set up focus fail. Error : %@", error.localizedDescription);
     }
+}
+
+- (CGPoint)convertLTtoRTWithPoint:(CGPoint)targetPoint
+{
+    CGPoint convertedPoint = CGPointMake(targetPoint.y, [UIScreen mainScreen].bounds.size.width - targetPoint.x);
+    
+    return convertedPoint;
 }
 
 @end

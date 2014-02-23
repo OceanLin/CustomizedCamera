@@ -11,5 +11,7 @@
 
 #define ImageReadyFromAVCapture @"ImageReadyFromAVCapture"
 #define CapturedImageData @"CapturedImageData"
+#define AVCameraTouchToFocus @"AVCameraTouchToFocus"
+#define FocusPOI @"FocusPOI"
 
 #endif

@@ -315,6 +315,11 @@
     }
 }
 
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 #pragma mark - DrawingView Delegate/Event handler
 
 - (IBAction)finishDraw:(id)sender {
