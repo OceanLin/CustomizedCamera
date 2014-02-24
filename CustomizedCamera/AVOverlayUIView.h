@@ -9,5 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface AVOverlayUIView : UIView
-
+@property (nonatomic) BOOL enableTapToFocus;
 @end

@@ -18,14 +18,17 @@
 @property (strong, nonatomic) IBOutlet AVOverlayUIView *avOverlayView;
 @property (weak, nonatomic) IBOutlet UIButton *flashModeBTN;
 @property (weak, nonatomic) IBOutlet UIButton *reverseBTN;
+@property (nonatomic) BOOL enableTapToFocus;
+@property (nonatomic) BOOL isFrontCamera;
 @end
 
 @implementation AVCameraViewController
 
 #define PreferenceCameraDevice @"PreferenceCameraDevice"
-#define PreferenceFlashMode @"PreferenceFlashMode"
-#define PreferencecontinuallyFocus @"PreferencecontinuallyAutoFocus"
+#define PreferenceAVFlashMode @"PreferenceAVFlashMode"
+#define PreferenceContinuallyFocus @"PreferenceContinuallyAutoFocus"
 #define PreferenceFocusPOI @"PreferenceFocusPOI"
+#define PreferenceEnableTapToFocus @"PreferenceEnableTapToFocus"
 
 #pragma mark - Initialization
 
@@ -59,6 +62,8 @@
         [[NSBundle mainBundle] loadNibNamed:@"AVOverlayView" owner:self options:nil];
         [self.avOverlayView setFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height)];
         [self setCustomizedCameraUI];
+        //self.avOverlayView.enableTapToFocus = self.supportFocusPOI;
+        self.avOverlayView.enableTapToFocus = YES;
         [self.view addSubview:self.avOverlayView];
         [self.captureSession startRunning];
     }
@@ -84,9 +89,9 @@
         
         for (AVCaptureDeviceInput *input in self.captureSession.inputs) {
             AVCaptureDevice *captureDevice = [input device];
-            //NSLog(@"%@", captureDevice.localizedName);
             NSError *error;
             if ([captureDevice lockForConfiguration:&error]) {
+                NSLog(@"%@", captureDevice.localizedName);
                 if ([captureDevice isFocusPointOfInterestSupported]) {
                     [captureDevice setFocusPointOfInterest:convertedPOIInPercentage];
                     if ([captureDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
@@ -114,6 +119,7 @@
                     NSLog(@"Can not support POI exposure.");
                 }
                 
+                /*
                 if ([captureDevice isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeAutoWhiteBalance]) {
                     [captureDevice setWhiteBalanceMode:AVCaptureWhiteBalanceModeAutoWhiteBalance];
                 } else {
@@ -124,6 +130,7 @@
                         NSLog(@"Can not support ContinuousAutoWhiteBalance also");
                     }
                 }
+                */
                 [captureDevice unlockForConfiguration];
             } else {
                 NSLog(@"Touch to set focus fail.");
@@ -156,6 +163,11 @@
                             NSLog(@"Got error when set the device input.");
                             return nil;
                         } else {
+                            if (preferenceDevicePosition == AVCaptureDevicePositionBack) {
+                                self.isFrontCamera = NO;
+                            } else {
+                                self.isFrontCamera = YES;
+                            }
                             [self setupFocusWithDevice:[deviceInput device]];
                             [_captureSession addInput:deviceInput];
                             break;
@@ -163,12 +175,14 @@
                     }
                     
                 } else {
+                    //The default camera device is back camera.
                     if ([device position] == AVCaptureDevicePositionBack) {
                         AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:device error:&error];
                         if (error) {
                             NSLog(@"Got error when set the device input.");
                             return nil;
                         } else {
+                            self.isFrontCamera = NO;
                             [self setupFocusWithDevice:[deviceInput device]];
                             [_captureSession addInput:deviceInput];
                             break;
@@ -220,7 +234,12 @@
                 NSLog(@"No image data from the image output.");
             } else {
                 NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-                UIImage *capturedImage = [UIImage imageWithData:imageData];
+                UIImage *capturedImage;
+                if (self.isFrontCamera) {
+                    capturedImage = [UIImage imageWithCGImage:[UIImage imageWithData:imageData].CGImage scale:capturedImage.scale orientation:UIImageOrientationLeftMirrored];
+                } else {
+                    capturedImage = [UIImage imageWithData:imageData];
+                }
                 [[NSNotificationCenter defaultCenter] postNotificationName:ImageReadyFromAVCapture object:nil userInfo:@{CapturedImageData:capturedImage}];
                 
                 //If we need the meta data, we can retrieve that by following call.
@@ -246,6 +265,7 @@
                         break;
                     } else {
                         [self setupFocusWithDevice:[deviceInput device]];
+                        self.isFrontCamera =YES;
                         
                         [self.captureSession beginConfiguration];
                         [self.captureSession removeInput:oldInput];
@@ -268,6 +288,7 @@
                         break;
                     } else {
                         [self setupFocusWithDevice:[deviceInput device]];
+                        self.isFrontCamera = NO;
                         
                         [self.captureSession beginConfiguration];
                         [self.captureSession removeInput:oldInput];
@@ -321,7 +342,7 @@
                             break;
                     }
                     [[input device] unlockForConfiguration];
-                    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:captureDevice.flashMode] forKey:PreferenceFlashMode];
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:captureDevice.flashMode] forKey:PreferenceAVFlashMode];
                 } else {
                     NSLog(@"Change flash mode fail : error : %@", error.localizedDescription);
                 }
@@ -352,8 +373,8 @@
         if ([input device].position == AVCaptureDevicePositionBack) {
             AVCaptureDevice *captureDevice = [input device];
             if (captureDevice.isFlashAvailable) {
-                if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferenceFlashMode]) {
-                    AVCaptureFlashMode flashMode = [[NSUserDefaults standardUserDefaults] integerForKey:PreferenceFlashMode];
+                if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferenceAVFlashMode]) {
+                    AVCaptureFlashMode flashMode = [[NSUserDefaults standardUserDefaults] integerForKey:PreferenceAVFlashMode];
                     NSError *error;
                     if ([captureDevice lockForConfiguration:&error]) {
                         [captureDevice setFlashMode:flashMode];
@@ -408,32 +429,87 @@
 - (void)setupFocusWithDevice:(AVCaptureDevice *)captureDevice
 {
     NSError *error;
+    self.enableTapToFocus = YES;
     if ([captureDevice lockForConfiguration:&error]) {
-        if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferencecontinuallyFocus]) {
-            if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferencecontinuallyFocus]) {
+        NSLog(@"%@", captureDevice.localizedName);
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceEnableTapToFocus]) {
+            if ([captureDevice isFocusPointOfInterestSupported]) {
+                [captureDevice setFocusPointOfInterest:CGPointMake(0.5f, 0.5f)];
+                if ([captureDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
+                    [captureDevice setFocusMode:AVCaptureFocusModeAutoFocus];
+                } else {
+                    NSLog(@"Can not support AutoFocus.");
+                }
+            } else {
+                NSLog(@"Can not support POI focus.");
+                /*
+                UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Focus Setting" message:@"Can not support FocusPointOfInterest" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                [alertView show];
+                */
+            }
+            
+            if ([captureDevice isExposurePointOfInterestSupported]) {
+                [captureDevice setExposurePointOfInterest:CGPointMake(0.5f, 0.5f)];
+                if ([captureDevice isExposureModeSupported:AVCaptureExposureModeAutoExpose]) {
+                    [captureDevice setExposureMode:AVCaptureExposureModeAutoExpose];
+                } else {
+                    NSLog(@"Can not support AutoExpose.");
+                    if ([captureDevice isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure]) {
+                        [captureDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+                    } else {
+                        NSLog(@"Can not support ContinuousAutoExposure also.");
+                    }
+                }
+            } else {
+                NSLog(@"Can not support POI exposure.");
+            }
+            
+            /*
+            if ([captureDevice isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeAutoWhiteBalance]) {
+                [captureDevice setWhiteBalanceMode:AVCaptureWhiteBalanceModeAutoWhiteBalance];
+            } else {
+                NSLog(@"Can not support AutoWhiteBalance");
+                if ([captureDevice isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance]) {
+                    [captureDevice setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
+                } else {
+                    NSLog(@"Can not support ContinuousAutoWhiteBalance also");
+                }
+            }
+            */
+        } else {
+        //If the device doesn't support focus POI or user disable the focus POI option in settings.
+            self.enableTapToFocus = NO;
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceContinuallyFocus]) {
                 if ([captureDevice isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus]) {
                     [captureDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
                 } else {
+                    NSLog(@"Can not support ContinuousAutoFocus.");
+                    /*
                     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Focus Setting" message:@"Can not set AVCaptureFocusModeContinuousAutoFocus" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
                     [alertView show];
+                    */
                 }
             } else {
                 if ([captureDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
                     [captureDevice setFocusMode:AVCaptureFocusModeAutoFocus];
                 } else {
+                    NSLog(@"Can not support AVCaptureFocusModeAutoFocus.");
+                    /*
                     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Focus Setting" message:@"Can not set AVCaptureFocusModeAutoFocus" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
                     [alertView show];
+                    */
                 }
             }
-        }
         
-        if ([[NSUserDefaults standardUserDefaults] objectForKey:PreferenceFocusPOI]) {
             if ([[NSUserDefaults standardUserDefaults] boolForKey:PreferenceFocusPOI]) {
                 if ([captureDevice isFocusPointOfInterestSupported]) {
                     [captureDevice setFocusPointOfInterest:CGPointMake(0.5f, 0.5f)];
                 } else {
+                    NSLog(@"Can not support focus POI.");
+                    /*
                     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Focus Setting" message:@"Can not set Focus POI" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
                     [alertView show];
+                    */
                 }
             }
         }

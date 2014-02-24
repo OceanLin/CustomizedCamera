@@ -13,7 +13,6 @@
 @property (strong, nonatomic) UIBezierPath *focusRectangle;
 @property (strong, nonatomic) NSTimer *focusUITimer;
 @property (nonatomic) BOOL drawingFocus;
-@property (nonatomic) BOOL enableTapToFocus;
 @end
 
 @implementation AVOverlayUIView
@@ -28,9 +27,6 @@
         // Initialization code
         self.drawingFocus = NO;
         self.multipleTouchEnabled = NO;
-        if ([[NSUserDefaults standardUserDefaults] objectForKey:@"enableTapToFocus"]) {
-            self.enableTapToFocus = [[NSUserDefaults standardUserDefaults] boolForKey:@"enableTapToFocus"];
-        }
     }
     return self;
 }
@@ -42,9 +38,6 @@
         // Initialization code
         self.drawingFocus = NO;
         self.multipleTouchEnabled = NO;
-        if ([[NSUserDefaults standardUserDefaults] objectForKey:@"enableTapToFocus"]) {
-            self.enableTapToFocus = [[NSUserDefaults standardUserDefaults] boolForKey:@"enableTapToFocus"];
-        }
     }
     return self;
 }

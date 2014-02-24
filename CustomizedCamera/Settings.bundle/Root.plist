@@ -40,7 +40,7 @@
 			<key>Title</key>
 			<string>Enable continually auto focus</string>
 			<key>Key</key>
-			<string>PreferencecontinuallyAutoFocus</string>
+			<string>PreferenceContinuallyAutoFocus</string>
 			<key>DefaultValue</key>
 			<true/>
 		</dict>
@@ -60,7 +60,7 @@
 			<key>Title</key>
 			<string>Enable tap to focus</string>
 			<key>Key</key>
-			<string>enableTapToFocus</string>
+			<string>PreferenceEnableTapToFocus</string>
 			<key>DefaultValue</key>
 			<true/>
 		</dict>

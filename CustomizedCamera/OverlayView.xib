@@ -89,7 +89,7 @@
                         <action selector="importPhoto:" destination="-1" eventType="touchUpInside" id="JpH-tM-y5S"/>
                     </connections>
                 </button>
-                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" scrollEnabled="NO" text="Hello, you can type some message here then send with the photo." translatesAutoresizingMaskIntoConstraints="NO" id="0KX-Jl-GAi">
+                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" scrollEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0KX-Jl-GAi">
                     <rect key="frame" x="20" y="147" width="280" height="185"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>

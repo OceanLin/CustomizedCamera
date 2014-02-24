@@ -242,6 +242,9 @@
 
 - (IBAction)textContent:(id)sender {
     self.inputTextView.userInteractionEnabled = YES;
+    if (self.inputTextView.text.length == 0) {
+        self.inputTextView.text = @"Hello, you can type some message here then send with the photo.";
+    }
     [self.inputTextView setSelectedRange:NSMakeRange(0, self.inputTextView.text.length)];
     [self.inputTextView becomeFirstResponder];
 }
@@ -387,6 +390,9 @@
             break;
             
         default:
+            [self.flashModeBTN setTitle:@"FlashAuto" forState:UIControlStateNormal];
+            mode = UIImagePickerControllerCameraFlashModeAuto;
+            [userDefault setObject:[NSNumber numberWithInt:UIImagePickerControllerCameraFlashModeAuto] forKey:PreferenceFlashMode];
             break;
     }
     self.imagePickerController.cameraFlashMode = mode;
